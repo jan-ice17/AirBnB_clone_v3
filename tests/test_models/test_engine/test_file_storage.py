@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 """
-Contains the TestFileStorageDocs classes
+Contains the TestFileStorageDocs and TestFileStorage classes
 """
 
-from datetime import datetime
 import inspect
-import models
+import json
+import unittest
+import pep8
 from models.engine import file_storage
 from models.amenity import Amenity
 from models.base_model import BaseModel
@@ -14,10 +15,7 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-import json
-import os
-import pep8
-import unittest
+
 FileStorage = file_storage.FileStorage
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
@@ -25,6 +23,7 @@ classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
 
 class TestFileStorageDocs(unittest.TestCase):
     """Tests to check the documentation and style of FileStorage class"""
+
     @classmethod
     def setUpClass(cls):
         """Set up for the doc tests"""
@@ -40,8 +39,8 @@ class TestFileStorageDocs(unittest.TestCase):
     def test_pep8_conformance_test_file_storage(self):
         """Test tests/test_models/test_file_storage.py conforms to PEP8."""
         pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['tests/test_models/test_engine/\
-test_file_storage.py'])
+        result = pep8s.check_files(['tests/test_models/test_engine/'
+                                    'test_file_storage.py'])
         self.assertEqual(result.total_errors, 0,
                          "Found code style errors (and warnings).")
 
@@ -70,6 +69,7 @@ test_file_storage.py'])
 
 class TestFileStorage(unittest.TestCase):
     """Test the FileStorage class"""
+
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
     def test_all_returns_dict(self):
         """Test that all returns the FileStorage.__objects attr"""
@@ -80,7 +80,7 @@ class TestFileStorage(unittest.TestCase):
 
     @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
     def test_new(self):
-        """test that new adds an object to the FileStorage.__objects attr"""
+        """Test that new adds an object to the FileStorage.__objects attr"""
         storage = FileStorage()
         save = FileStorage._FileStorage__objects
         FileStorage._FileStorage__objects = {}
@@ -113,3 +113,36 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_get(self):
+        """this will test if getretrieves the correct objects"""
+        storage = FileStorage()
+        new_state = State(name="Texas")
+        storage.new(new_state)
+        storage.save()
+        retrieved_state = storage.get(State, new_state.id)
+        self.assertEqual(retrieved_state, new_state)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing file storage")
+    def test_count(self):
+        """this will test that count returns the correct number of objects"""
+        storage = FileStorage()
+        # Count the initial number of State objects in storage
+        initial_state_count = storage.count(State)
+        # Create and add a new State object to the storage
+        new_state = State(name="Arizna")
+        storage.new(new_state)
+        storage.save()
+        # Verify that the count of State objects has increased by 1
+        updated_state_count = storage.count(State)
+        self.assertEqual(updated_state_count, initial_state_count + 1)
+        # Count the total number of objects across all classes in storage
+        initial_total_count = storage.count()
+        # Add a new City object associated with the new State
+        new_city = City(name="Phoenix", state_id=new_state.id)
+        storage.new(new_city)
+        storage.save()
+        # Verify that the total object count has increased by 1
+        updated_total_count = storage.count()
+        self.assertEqual(updated_total_count, initial_total_count + 1)
