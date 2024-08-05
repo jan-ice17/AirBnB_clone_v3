@@ -68,21 +68,62 @@ test_db_storage.py'])
                             "{:s} method needs a docstring".format(func[0]))
 
 
-class TestFileStorage(unittest.TestCase):
-    """Test the FileStorage class"""
+class TestDBStorage(unittest.TestCase):
+    """Test the DBStorage class"""
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_all_returns_dict(self):
-        """Test that all returns a dictionaty"""
+        """Test that all returns a dictionary"""
         self.assertIs(type(models.storage.all()), dict)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_all_no_class(self):
         """Test that all returns all rows when no class is passed"""
+        all_objs = models.storage.all()
+        self.assertEqual(type(all_objs), dict)
+        self.assertGreater(len(all_objs), 0)
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_new(self):
-        """test that new adds an object to the database"""
+        """Test that new adds an object to the database"""
+        new_state = State(name="California")
+        models.storage.new(new_state)
+        self.assertIn(new_state, models.storage.all(State).values())
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
-        """Test that save properly saves objects to file.json"""
+        """Test that save properly saves objects to the database"""
+        new_state = State(name="Nevada")
+        models.storage.new(new_state)
+        models.storage.save()
+        self.assertIn(new_state, models.storage.all(State).values())
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_get(self):
+        """Test that get retrieves the correct object based on class and id"""
+        new_state = State(name="Texas")
+        models.storage.new(new_state)
+        models.storage.save()
+        retrieved_state = models.storage.get(State, new_state.id)
+        self.assertEqual(retrieved_state, new_state)
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_count(self):
+        """Test that count returns the correct number of objects"""
+        # Count the initial number of State objects in the database
+        initial_state_count = models.storage.count(State)
+        # Create and add a new State object to the database
+        new_state = State(name="Arizona")
+        models.storage.new(new_state)
+        models.storage.save()
+        # Verify that the count of State objects has increased by 1
+        updated_state_count = models.storage.count(State)
+        self.assertEqual(updated_state_count, initial_state_count + 1)
+        # Count the total number of objects across all classes in the database
+        initial_total_count = models.storage.count()
+        # Add a new City object associated with the new State
+        new_city = City(name="Phoenix", state_id=new_state.id)
+        models.storage.new(new_city)
+        models.storage.save()
+        # Verify that the total object count has increased by 1
+        updated_total_count = models.storage.count()
+        self.assertEqual(updated_total_count, initial_total_count + 1)
