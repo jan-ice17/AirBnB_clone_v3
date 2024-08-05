@@ -70,7 +70,7 @@ class FileStorage:
         self.reload()
 
     def get(self, cls, obj_id):
-        """Retrieves an object based on class and ID from __objects"""
+        """This retruves an object based on class and ID from __objects"""
         if cls and obj_id:
             # Construct the key using class name and object ID
             key = "{}.{}".format(cls.__name__, obj_id)
@@ -78,7 +78,7 @@ class FileStorage:
         return None
 
     def count(self, cls=None):
-        """Counts the number of objects in __objects"""
+        """This counts the number of objects in __objects"""
         if cls:
             # Count only objects of a specified class
             return len(

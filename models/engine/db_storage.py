@@ -76,13 +76,13 @@ class DBStorage:
         self.__session.remove()
 
     def get(self, cls, unique_id):
-        """Retrieve a specific object from the database"""
+        """This retrieves a specific object from the database"""
         if cls and unique_id:
             return self.__session.query(cls).filter_by(id=unique_id).first()
         return None
 
     def count(self, cls=None):
-        """Count the number of objects in the database"""
+        """This Counts the number of objects in the database"""
         if cls:
             return self.__session.query(cls).count()
         else:
