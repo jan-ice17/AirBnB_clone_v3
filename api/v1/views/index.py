@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+A sciprt that creates a variable app, instance of Flask
+"""
 
 from flask import jsonify
 from api.v1.views import app_views
