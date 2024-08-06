@@ -1,3 +1,8 @@
+#!/usr/bin/python3
+"""
+A script that create a variable
+app_views which is an instance of Blueprint"
+"""
 from flask import Flask
 from models import storage
 from api.v1.views import app_views
